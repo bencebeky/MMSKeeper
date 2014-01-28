@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">MMS Keeper</string>
+    <string name="app_name">MMSKeeper</string>
     <string name="dataOnLabel">"TYPE when data is on (e.g. &quot;default,supl,admin,dun,mms&quot;):"</string>
     <string name="dataOffLabel">"TYPE when data is off (e.g. &quot;mms&quot;):"</string>
     <string name="dataOnType">default,supl,admin,dun,mms</string>

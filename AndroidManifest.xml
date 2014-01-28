@@ -12,14 +12,14 @@
         android:icon="@drawable/ic_data_on"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-        <receiver android:name="MMSKeeperWidget" android:label="MMS Keeper" >
+        <receiver android:name="MMSKeeperWidget" android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="edu.harvard.android.mmskeeper.CLICK" />
                 </intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/appwidget_info" />
         </receiver>
-        <activity android:name="Settings" android:label="@string/app_name" >
+        <activity android:name="MMSKeeper" android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
