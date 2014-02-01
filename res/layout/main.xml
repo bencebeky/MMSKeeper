@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".Settings" >
+    tools:context=".MMSKeeper" >
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -15,15 +15,15 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/text_margin"
-            android:layout_toLeftOf="@+id/settingsImage"
+            android:layout_toLeftOf="@+id/toggleImage"
             android:text="@string/infoBox" />
 
         <ImageButton
-            android:id="@+id/settingsImage"
+            android:id="@+id/toggleImage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:contentDescription="@string/settingsImageContentDescription"
+            android:contentDescription="@string/toggleImageContentDescription"
             android:onClick="toggleTap"
             android:src="@drawable/ic_data_on" />
     </RelativeLayout>

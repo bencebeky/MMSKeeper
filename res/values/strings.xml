@@ -12,7 +12,7 @@
     <string name="buttonDiscard">Discard</string>
     <string name="buttonReset">Reset</string>
     <string name="widgetImageContentDescription">Widget Image</string>
-    <string name="settingsImageContentDescription">Settings Image</string>
+    <string name="toggleImageContentDescription">Main Activity Toggle Image</string>
     <string name="infoBox">"This app enables and disables data by changing the TYPE of the current APN (Access Point Name). You have to keep &quot;Mobile Data&quot; turned on the be able to send/receive multimedia messages (MMS). Tap on the icon on the right or use the widget to toggle."</string>
     <string name="permissionError">Error: on Android 4.0 and above, MMS Keeper needs to be converted to a system app. Root your device, then use /system/app mover or similar.</string>
     

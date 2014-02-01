@@ -20,143 +20,151 @@
 
 package edu.harvard.android.mmskeeper;
 
-import android.content.ComponentName;
-import android.content.ContentValues;
+import android.os.Bundle;
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.provider.Telephony.Carriers;
-import android.widget.Toast;
-import android.net.Uri;
-import android.appwidget.AppWidgetManager;
-import android.view.ContextThemeWrapper;
-import android.widget.RemoteViews;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
-// This static class does all the background work.
-public class MMSKeeper extends ContextThemeWrapper {
-        public static final Uri APN_TABLE_URI = Uri.parse("content://telephony/carriers");
-        public static final Uri PREFERRED_APN_URI = Uri.parse("content://telephony/carriers/preferapn");
+/* MMSKeeper:       main activity for settings and toggle,
+ * MMSKeeperWidget: widget for toggle,
+ * MMSKeeperCommon: backend for APN configuration.
+ *
+ * Widget icons are updated from MMSKeeperCommon: it needs to be done with every toggle.
+ * Main activity is only refreshed when
+ *    - user toggles from main activity,
+ *    - or main activity is brought to foreground.
+ */
 
-        // Update icons of every widget instance. Called when widget is updated, and when data is toggled.
-        public static void updateWidgetIcons(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-                final int N = appWidgetIds.length;
-                Integer defaultId = getDefaultId(context);
-                if (defaultId != -1) {
-                        // Perform this loop procedure for each App Widget that belongs to this provider
-                        for (int i=0; i<N; i++) {
-                                int appWidgetId = appWidgetIds[i];
-                                // Update icon.
-                                RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget);
-                                if (getDataOn(context, defaultId))
-                                        views.setImageViewResource(R.id.widgetImage, R.drawable.ic_data_on);
-                                else
-                                        views.setImageViewResource(R.id.widgetImage, R.drawable.ic_data_off);
-                                // Tell the AppWidgetManager to perform an update on the current app widget.
-                                appWidgetManager.updateAppWidget(appWidgetId, views);
-                        }
-                }
+public class MMSKeeper extends Activity {
+
+        @Override
+        protected void onCreate(Bundle savedInstanceState) {
+                super.onCreate(savedInstanceState);
+                setContentView(R.layout.MMSKeeper);
+                // Save type when first run.
+                saveInitialType();
+                // Fill up EditTexts from preferences.
+                discardTypes(null);
+                // Update initType TextView.
+                // Note that currentType TextView and toggleImage ImageButton are updated by onResume(),
+                // even when the app first starts up.
+                Context context = getApplicationContext();
+                updateInit(context);
         }
 
-        // Toggle types when Toggle button is tapped.
-        public static void toggleData(Context context) {
-                Integer defaultId = getDefaultId(context);
-                if (defaultId != -1) {
-                        // Query status.
-                        Boolean isDataOn = getDataOn(context, defaultId);
-                        // Set inverse.
-                        setData(context, defaultId, !isDataOn);
-                        /* Update widget icons. Settings Activity icons and text
-                         * are updated by Settings class when toggle is initiated from
-                         * Settings activity, and later by Settings.onResume if it is
-                         * initiated by widgets.
-                         */
-                        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-                        updateWidgetIcons(context, appWidgetManager, appWidgetManager.getAppWidgetIds(new ComponentName(context.getPackageName(),MMSKeeperWidget.class.getName())));
-                }
+        @Override
+        public void onResume() {
+                // Always call the superclass method first.
+                super.onResume();
+                // Update currentType TextView and toggleImage ImageButton.
+                Context context = getApplicationContext();
+                Integer defaultId = MMSKeeperCommon.getDefaultId(context);
+                updateCurrent(context, defaultId);
+                updateImage(context, defaultId);
         }
 
-        // Compare Type to our strings to see if data is on.
-        public static Boolean getDataOn(Context context, Integer defaultId) {
-                String type = getType(context, defaultId);
-                if (type == null)
-                        // We don't have permission.
-                        return true;
-                else {
-                        SharedPreferences settings = context.getSharedPreferences("global", MODE_PRIVATE);
-                        String dataOnType = settings.getString("dataOnType", context.getString(R.string.dataOnType));
-                        return (type.compareTo(dataOnType) == 0);
-                }
+        // Toggle image tapped.
+        public void toggleTap(View view) {
+                Context context = getApplicationContext();
+                Integer defaultId = MMSKeeperCommon.getDefaultId(context);
+                MMSKeeperCommon.toggleData(context);
+                /* Do not forget to update toggleImage and currentType.
+                 * MMSKeeper does not do this because
+                 * 1. most of the time there is no Activity, only widget;
+                 * 2. it is cumbersome to query Activity from a different class.
+                 */
+                updateImage(context, defaultId);
+                updateCurrent(context, defaultId);
         }
 
-        // Read preferred table to find _id of default APN.
-        public static Integer getDefaultId(Context context) {
-                Cursor c;
-                String[] projections = new String[] {Carriers._ID};
-                Integer defaultId = -1;
-                try {
-                        // Query database.
-                        c = context.getContentResolver().query(PREFERRED_APN_URI, projections, null, null, Carriers.DEFAULT_SORT_ORDER);
-                        if (c != null) {
-                                if (c.moveToFirst()) {
-                                        defaultId = c.getInt(c.getColumnIndex(Carriers._ID));
-                                }
-                                c.close();
-                        }
-                } catch (SecurityException e) {
-                        // No permission.
-                        if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-                                Toast toast = Toast.makeText(context, context.getString(R.string.permissionError), Toast.LENGTH_SHORT);
-                                toast.show();
-                        }
-                }
-                return defaultId;
+        // Save dataOnType and dataOffType preferences when Save is tapped.
+        public void saveTypes(View view) {
+                SharedPreferences settings = getSharedPreferences("global", MODE_PRIVATE);
+                SharedPreferences.Editor editor = settings.edit();
+                EditText editDataOn = (EditText) findViewById(R.id.editDataOn);
+                EditText editDataOff = (EditText) findViewById(R.id.editDataOff);
+                editor.putString("dataOnType", editDataOn.getText().toString());
+                editor.putString("dataOffType", editDataOff.getText().toString());
+                editor.apply();
         }
 
-        // Read current type from database.
-        public static String getType(Context context, Integer defaultId) {
-                if (defaultId == -1)
-                        return null;
-                Cursor c;
-                String[] projections = new String[] {Carriers._ID, Carriers.TYPE};
-                String where = "_id = ?";
-                String wargs[] = new String[] {Integer.toString(defaultId)};
-                String type = null;
-                try {
-                        // Query database.
-                        c = context.getContentResolver().query(APN_TABLE_URI, projections, where, wargs, Carriers.DEFAULT_SORT_ORDER);
-                        if (c != null) {
-                                if (c.moveToFirst()) {
-                                        type = c.getString(c.getColumnIndex(Carriers.TYPE));
-                                }
-                                c.close();
-                        }
-                } catch (SecurityException e) {
-                        // No permission: do nothing. Toaster is displayed by getDefaultId anyway.
-                }
-                return type;
+        // Fill EditTexts from preferences when Discard is tapped.
+        public void discardTypes(View view) {
+                // Load preferences to fill in EditTexts.
+                SharedPreferences settings = getSharedPreferences("global", MODE_PRIVATE);
+                String dataOnType = settings.getString("dataOnType", getString(R.string.dataOnType));
+                String dataOffType = settings.getString("dataOffType", getString(R.string.dataOffType));
+                // Fill EditTexts.
+                EditText editDataOn = (EditText) findViewById(R.id.editDataOn);
+                EditText editDataOff = (EditText) findViewById(R.id.editDataOff);
+                editDataOn.setText(dataOnType);
+                editDataOff.setText(dataOffType);
         }
 
-        // Turn data on or off.
-        public static void setData(Context context, Integer defaultId, Boolean isDataOn) {
+        // Fill EditTexts from initType and "mms" when Reset is tapped.
+        public void resetTypes(View view) {
+                SharedPreferences settings = getSharedPreferences("global", MODE_PRIVATE);
+                SharedPreferences.Editor editor = settings.edit();
+                String initType = settings.getString("initType", getString(R.string.dataOnType));
+                editor.putString("dataOnType", initType);
+                editor.putString("dataOffType", "mms");
+                editor.apply();
+                // And copy preferences to EditTexts.
+                discardTypes(null);
+        }
+
+        // Update toggleImage ImageButton.
+        private void updateImage(Context context, Integer defaultId) {
                 if (defaultId == -1)
                         return;
-                // Load data strings from preferences.
-                SharedPreferences settings = context.getSharedPreferences("global", MODE_PRIVATE);
-                String newType;
-                if (isDataOn)
-                        newType = settings.getString("dataOnType", context.getString(R.string.dataOnType));
+                ImageButton toggleImage = (ImageButton) findViewById(R.id.toggleImage);
+                Integer image;
+                if (MMSKeeperCommon.getDataOn(context, defaultId))
+                        image = R.drawable.ic_data_on;
                 else
-                        newType = settings.getString("dataOffType", context.getString(R.string.dataOffType));
-                // Assemble query.
-                String where = "_id = ?";
-                String wargs[] = new String[] {Integer.toString(defaultId)};
-                ContentValues updateValues = new ContentValues();
-                updateValues.put(Carriers.TYPE, newType);
-                try {
-                        // Update database.
-                        context.getContentResolver().update(APN_TABLE_URI, updateValues, where, wargs);
-                } catch (SecurityException e) {
-                        // No permission: do nothing. Toaster is displayed by getDefaultId anyway.
+                        image = R.drawable.ic_data_off;
+                toggleImage.setImageResource(image);
+        }
+
+        // Update currentType TextView.
+        private void updateCurrent(Context context, Integer defaultId) {
+                TextView currentType = (TextView) findViewById(R.id.currentType);
+                String type = null;
+                if (defaultId != -1)
+                        // Query current TYPE.
+                        type = MMSKeeperCommon.getType(context, defaultId);
+                if (type != null)
+                        currentType.setText(getString(R.string.currentType) + "\"" + type + "\".");
+                else
+                        currentType.setText(getString(R.string.currentType) + "null.");
+        }
+
+        // Update initType TextView.
+        private void updateInit(Context context) {
+                TextView initType = (TextView) findViewById(R.id.initType);
+                SharedPreferences settings = getSharedPreferences("global", MODE_PRIVATE);
+                String type = settings.getString("initType", getString(R.string.dataOnType));
+                initType.setText(getString(R.string.initType) + " \"" + type + "\".");
+        }
+
+        // Save current type if this is the first time.
+        private void saveInitialType() {
+                SharedPreferences settings = getSharedPreferences("global", MODE_PRIVATE);
+                String initType = settings.getString("initType", null);
+                // If preference does not exist: this is the first time.
+                if (initType == null) {
+                        Context context = getApplicationContext();
+                        Integer defaultId = MMSKeeperCommon.getDefaultId(context);
+                        if (defaultId != -1) {
+                                String type = MMSKeeperCommon.getType(context, defaultId);
+                                SharedPreferences.Editor editor = settings.edit();
+                                editor.putString("initType", type);
+                                editor.apply();
+                        }
                 }
         }
 }

@@ -27,6 +27,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.widget.RemoteViews;
 
+/* MMSKeeper:       main activity for settings and toggle,
+ * MMSKeeperWidget: widget for toggle,
+ * MMSKeeperCommon: backend for APN configuration.
+ *
+ * Widget icons are updated from MMSKeeperCommon: it needs to be done with every toggle.
+ * Main activity is only refreshed when
+ *    - user toggles from main activity,
+ *    - or main activity is brought to foreground.
+ */
+
 public class MMSKeeperWidget extends AppWidgetProvider {
         static public final String CLICK = "edu.harvard.android.mmskeeper.CLICK";
 
@@ -45,7 +55,7 @@ public class MMSKeeperWidget extends AppWidgetProvider {
                     // Tell the AppWidgetManager to perform an update on the current app widget
                     appWidgetManager.updateAppWidget(appWidgetId, views);
                 }
-                MMSKeeper.updateWidgetIcons(context, appWidgetManager, appWidgetIds);
+                MMSKeeperCommon.updateWidgetIcons(context, appWidgetManager, appWidgetIds);
         }
 
         @Override
@@ -61,7 +71,7 @@ public class MMSKeeperWidget extends AppWidgetProvider {
                 final String action = intent.getAction();
 
                 if(action.equals(CLICK))
-                        MMSKeeper.toggleData(context);
+                        MMSKeeperCommon.toggleData(context);
                 else
                         super.onReceive(context, intent);
         }
