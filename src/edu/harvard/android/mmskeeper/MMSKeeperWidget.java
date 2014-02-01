@@ -28,10 +28,10 @@ import android.content.Intent;
 import android.widget.RemoteViews;
 
 public class MMSKeeperWidget extends AppWidgetProvider {
-	static public final String CLICK = "edu.harvard.android.mmskeeper.CLICK";
+        static public final String CLICK = "edu.harvard.android.mmskeeper.CLICK";
 
-	@Override
-	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+        @Override
+        public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         final int N = appWidgetIds.length;
 
         // Perform this loop procedure for each App Widget that belongs to this provider
@@ -46,23 +46,23 @@ public class MMSKeeperWidget extends AppWidgetProvider {
             appWidgetManager.updateAppWidget(appWidgetId, views);
         }
         MMSKeeper.updateWidgetIcons(context, appWidgetManager, appWidgetIds);
-	}
-	
-	@Override
-	public void onEnabled(Context context) {
-	}
-	
-	@Override
-	public void onDisabled(Context context) {
-	}
-	
-	@Override
-	public void onReceive(Context context, Intent intent) {
-		final String action = intent.getAction();
+        }
 
-		if(action.equals(CLICK))
-			MMSKeeper.toggleData(context);
-		else
-			super.onReceive(context, intent);
-	}
+        @Override
+        public void onEnabled(Context context) {
+        }
+
+        @Override
+        public void onDisabled(Context context) {
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+                final String action = intent.getAction();
+
+                if(action.equals(CLICK))
+                        MMSKeeper.toggleData(context);
+                else
+                        super.onReceive(context, intent);
+        }
 }
