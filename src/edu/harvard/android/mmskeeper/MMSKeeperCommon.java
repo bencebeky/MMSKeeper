@@ -42,7 +42,7 @@ import android.widget.RemoteViews;
  *    - or main activity is brought to foreground.
  */
 
-public class MMSKeeper extends ContextThemeWrapper {
+public class MMSKeeperCommon extends ContextThemeWrapper {
         public static final Uri APN_TABLE_URI = Uri.parse("content://telephony/carriers");
         public static final Uri PREFERRED_APN_URI = Uri.parse("content://telephony/carriers/preferapn");
 

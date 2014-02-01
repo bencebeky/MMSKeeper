@@ -44,7 +44,7 @@ public class MMSKeeper extends Activity {
         @Override
         protected void onCreate(Bundle savedInstanceState) {
                 super.onCreate(savedInstanceState);
-                setContentView(R.layout.MMSKeeper);
+                setContentView(R.layout.main);
                 // Save type when first run.
                 saveInitialType();
                 // Fill up EditTexts from preferences.
