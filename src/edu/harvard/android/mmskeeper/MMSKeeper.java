@@ -41,17 +41,19 @@ public class MMSKeeper extends ContextThemeWrapper {
         public static void updateWidgetIcons(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
                 final int N = appWidgetIds.length;
                 Integer defaultId = getDefaultId(context);
-                // Perform this loop procedure for each App Widget that belongs to this provider
-                for (int i=0; i<N; i++) {
-                        int appWidgetId = appWidgetIds[i];
-                        // Update icon.
-                        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget);
-                        if (getDataOn(context, defaultId))
-                                views.setImageViewResource(R.id.widgetImage, R.drawable.ic_data_on);
-                        else
-                                views.setImageViewResource(R.id.widgetImage, R.drawable.ic_data_off);
-                        // Tell the AppWidgetManager to perform an update on the current app widget.
-                        appWidgetManager.updateAppWidget(appWidgetId, views);
+                if (defaultId != -1) {
+                        // Perform this loop procedure for each App Widget that belongs to this provider
+                        for (int i=0; i<N; i++) {
+                                int appWidgetId = appWidgetIds[i];
+                                // Update icon.
+                                RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget);
+                                if (getDataOn(context, defaultId))
+                                        views.setImageViewResource(R.id.widgetImage, R.drawable.ic_data_on);
+                                else
+                                        views.setImageViewResource(R.id.widgetImage, R.drawable.ic_data_off);
+                                // Tell the AppWidgetManager to perform an update on the current app widget.
+                                appWidgetManager.updateAppWidget(appWidgetId, views);
+                        }
                 }
         }
 
@@ -112,11 +114,13 @@ public class MMSKeeper extends ContextThemeWrapper {
 
         // Read current type from database.
         public static String getType(Context context, Integer defaultId) {
-        Cursor c;
-        String[] projections = new String[] {Carriers._ID, Carriers.TYPE};
-        String where = "_id = ?";
-        String wargs[] = new String[] {Integer.toString(defaultId)};
-        String type = null;
+                if (defaultId == -1)
+                        return null;
+                Cursor c;
+                String[] projections = new String[] {Carriers._ID, Carriers.TYPE};
+                String where = "_id = ?";
+                String wargs[] = new String[] {Integer.toString(defaultId)};
+                String type = null;
                 try {
                         // Query database.
                         c = context.getContentResolver().query(APN_TABLE_URI, projections, where, wargs, Carriers.DEFAULT_SORT_ORDER);
@@ -134,6 +138,8 @@ public class MMSKeeper extends ContextThemeWrapper {
 
         // Turn data on or off.
         public static void setData(Context context, Integer defaultId, Boolean isDataOn) {
+                if (defaultId == -1)
+                        return;
                 // Load data strings from preferences.
                 SharedPreferences settings = context.getSharedPreferences("global", MODE_PRIVATE);
                 String newType;

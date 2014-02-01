@@ -32,20 +32,20 @@ public class MMSKeeperWidget extends AppWidgetProvider {
 
         @Override
         public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        final int N = appWidgetIds.length;
+                final int N = appWidgetIds.length;
 
-        // Perform this loop procedure for each App Widget that belongs to this provider
-        for (int i=0; i<N; i++) {
-            int appWidgetId = appWidgetIds[i];
-            // Create intent and bind it to click event.
-            Intent intent = new Intent(CLICK);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
-            RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget);
-            views.setOnClickPendingIntent(R.id.widgetImage, pendingIntent);
-            // Tell the AppWidgetManager to perform an update on the current app widget
-            appWidgetManager.updateAppWidget(appWidgetId, views);
-        }
-        MMSKeeper.updateWidgetIcons(context, appWidgetManager, appWidgetIds);
+                // Perform this loop procedure for each App Widget that belongs to this provider
+                for (int i=0; i<N; i++) {
+                    int appWidgetId = appWidgetIds[i];
+                    // Create intent and bind it to click event.
+                    Intent intent = new Intent(CLICK);
+                    PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+                    RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget);
+                    views.setOnClickPendingIntent(R.id.widgetImage, pendingIntent);
+                    // Tell the AppWidgetManager to perform an update on the current app widget
+                    appWidgetManager.updateAppWidget(appWidgetId, views);
+                }
+                MMSKeeper.updateWidgetIcons(context, appWidgetManager, appWidgetIds);
         }
 
         @Override

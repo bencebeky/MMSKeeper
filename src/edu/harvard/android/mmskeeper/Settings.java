@@ -43,8 +43,7 @@ public class Settings extends Activity {
                 // Note that currentType TextView and settingsImage ImageButton are updated by onResume(),
                 // even when the app first starts up.
                 Context context = getApplicationContext();
-                Integer defaultId = MMSKeeper.getDefaultId(context);
-                updateInit(context, defaultId);
+                updateInit(context);
         }
 
         @Override
@@ -110,13 +109,15 @@ public class Settings extends Activity {
 
         // Update settingsImage ImageButton.
         private void updateImage(Context context, Integer defaultId) {
-        ImageButton settingsImage = (ImageButton) findViewById(R.id.settingsImage);
-        Integer image;
-        if (MMSKeeper.getDataOn(context, defaultId))
-                image = R.drawable.ic_data_on;
-        else
-                image = R.drawable.ic_data_off;
-        settingsImage.setImageResource(image);
+                if (defaultId == -1)
+                        return;
+                ImageButton settingsImage = (ImageButton) findViewById(R.id.settingsImage);
+                Integer image;
+                if (MMSKeeper.getDataOn(context, defaultId))
+                        image = R.drawable.ic_data_on;
+                else
+                        image = R.drawable.ic_data_off;
+                settingsImage.setImageResource(image);
         }
 
         // Update currentType TextView.
@@ -133,7 +134,7 @@ public class Settings extends Activity {
         }
 
         // Update initType TextView.
-        private void updateInit(Context context, Integer defaultId) {
+        private void updateInit(Context context) {
                 TextView initType = (TextView) findViewById(R.id.initType);
                 SharedPreferences settings = getSharedPreferences("global", MODE_PRIVATE);
                 String type = settings.getString("initType", getString(R.string.dataOnType));
@@ -148,10 +149,12 @@ public class Settings extends Activity {
                 if (initType == null) {
                         Context context = getApplicationContext();
                         Integer defaultId = MMSKeeper.getDefaultId(context);
-                        String type = MMSKeeper.getType(context, defaultId);
-                        SharedPreferences.Editor editor = settings.edit();
-                        editor.putString("initType", type);
-                        editor.apply();
+                        if (defaultId != -1) {
+                                String type = MMSKeeper.getType(context, defaultId);
+                                SharedPreferences.Editor editor = settings.edit();
+                                editor.putString("initType", type);
+                                editor.apply();
+                        }
                 }
         }
 }
